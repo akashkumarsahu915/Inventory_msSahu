@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
       
       <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
         <div className={styles.sidebarHeader}>
-          <h2>MS Sahu</h2>
+          <h2>MS Sahu <br></br><span>Seeds & Fertilizer</span></h2>
           <button className={styles.closeButton} onClick={closeSidebar}>
             <FaTimes />
           </button>
