@@ -1,0 +1,124 @@
+import { createContext, useState, useContext, useEffect } from 'react'
+import { mockSales } from '../data/mockData'
+import { useInventory } from './InventoryContext'
+import { format } from 'date-fns'
+
+const SalesContext = createContext()
+
+export const useSales = () => useContext(SalesContext)
+
+export const SalesProvider = ({ children }) => {
+  const [sales, setSales] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { updateStock } = useInventory()
+
+  // Load mock data on initial render
+  useEffect(() => {
+    try {
+      // In a real application, this would be an API call
+      setSales(mockSales)
+      setLoading(false)
+    } catch (err) {
+      setError('Failed to load sales data')
+      setLoading(false)
+    }
+  }, [])
+
+  // Add a new sale
+  const addSale = (sale) => {
+    const newSale = {
+      ...sale,
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      status: 'completed'
+    }
+    
+    setSales(prevSales => [...prevSales, newSale])
+    
+    // Update product stock levels
+    sale.items.forEach(item => {
+      updateStock(item.productId, item.quantity, 'decrease')
+    })
+    
+    return newSale
+  }
+
+  // Get sales for a specific date range
+  const getSalesByDateRange = (startDate, endDate) => {
+    return sales.filter(sale => {
+      const saleDate = new Date(sale.date)
+      return saleDate >= startDate && saleDate <= endDate
+    })
+  }
+
+  // Get today's sales
+  const getTodaySales = () => {
+    const today = new Date()
+    const todayString = format(today, 'yyyy-MM-dd')
+    
+    return sales.filter(sale => {
+      const saleDate = format(new Date(sale.date), 'yyyy-MM-dd')
+      return saleDate === todayString
+    })
+  }
+
+  // Calculate total sales amount for a given date range
+  const calculateTotalSales = (salesList) => {
+    return salesList.reduce((total, sale) => total + sale.total, 0)
+  }
+
+  // Get sales by product id
+  const getSalesByProduct = (productId) => {
+    return sales.filter(sale => 
+      sale.items.some(item => item.productId === productId)
+    )
+  }
+
+  // Get sales data for charts (daily, weekly, monthly)
+  const getSalesDataForCharts = (period = 'daily', limit = 7) => {
+    // Implementation would depend on your charting needs
+    // This is a simple example for daily data
+    const salesData = {}
+    
+    // Get recent sales based on period and limit
+    const recentSales = [...sales]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, limit * 3) // Get more than we need to ensure we have enough unique dates
+    
+    // Group by date (for daily view)
+    recentSales.forEach(sale => {
+      const dateStr = format(new Date(sale.date), 'yyyy-MM-dd')
+      if (!salesData[dateStr]) {
+        salesData[dateStr] = 0
+      }
+      salesData[dateStr] += sale.total
+    })
+    
+    // Convert to array and limit to requested number of data points
+    const chartData = Object.entries(salesData)
+      .map(([date, value]) => ({ date, value }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(-limit)
+    
+    return chartData
+  }
+
+  const value = {
+    sales,
+    loading,
+    error,
+    addSale,
+    getSalesByDateRange,
+    getTodaySales,
+    calculateTotalSales,
+    getSalesByProduct,
+    getSalesDataForCharts
+  }
+
+  return (
+    <SalesContext.Provider value={value}>
+      {children}
+    </SalesContext.Provider>
+  )
+}
