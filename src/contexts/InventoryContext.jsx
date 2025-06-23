@@ -1,8 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react'
-import { mockProducts } from '../data/mockData'
-
+import axios from 'axios';
 const InventoryContext = createContext()
-
 export const useInventory = () => useContext(InventoryContext)
 
 export const InventoryProvider = ({ children }) => {
@@ -12,25 +10,35 @@ export const InventoryProvider = ({ children }) => {
 
   // Load mock data on initial render
   useEffect(() => {
-    try {
-      // In a real application, this would be an API call
-      setProducts(mockProducts)
-      setLoading(false)
-    } catch (err) {
-      setError('Failed to load inventory data')
-      setLoading(false)
+
+    const fetchProducts =async()=>{
+      try {
+     const response=await axios.get("http://localhost:3000/admin/getAllProduct")
+        setProducts(response.data.products);
+        console.log(response.data.products)
+      } catch (error) {
+        setError("failed to load inventory data");
+        console.log(error)
+      }finally{
+        setLoading(false)
+      }
+
     }
+    fetchProducts();
   }, [])
 
   // Add a new product
   const addProduct = (product) => {
-    const newProduct = {
-      ...product,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    }
-    setProducts(prevProducts => [...prevProducts, newProduct])
-    return newProduct
+
+    let response=axios.post("http://localhost:3000/admin/inventory/new",product);
+    console.log(response);
+    // const newProduct = {
+    //   ...product,
+    //   id: Date.now().toString(),
+    //   createdAt: new Date().toISOString()
+    // }
+    // setProducts(prevProducts => [...prevProducts, newProduct])
+    // return newProduct
   }
 
   // Update an existing product

@@ -8,7 +8,7 @@ import styles from './NewSale.module.css'
 const NewSale = () => {
   const navigate = useNavigate()
   const { products, searchProducts } = useInventory()
-  const { addSale } = useSales()
+  const { addSale,sales } = useSales()
   
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
@@ -34,7 +34,6 @@ const NewSale = () => {
   
   const addToCart = (product) => {
     const existingItem = cartItems.find(item => item.id === product.id)
-    
     if (existingItem) {
       // Increase quantity if already in cart
       setCartItems(cartItems.map(item => 

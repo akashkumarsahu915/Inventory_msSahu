@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useSales } from '../contexts/SalesContext'
+import { useSales } from '../contexts/SalesContext.jsx'
 import { format } from 'date-fns'
 import { FaPlus, FaDownload, FaCalendarAlt } from 'react-icons/fa'
 import styles from './Sales.module.css'
@@ -79,6 +79,7 @@ const Sales = () => {
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
     
     setFilteredSales(filtered)
+    
   }
   
   const handleDateRangeChange = (e) => {

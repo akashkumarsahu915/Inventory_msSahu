@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useInventory } from '../contexts/InventoryContext'
+import { useInventory } from '../contexts/InventoryContext.jsx'
 import { FaPlus, FaSearch, FaFilter, FaEdit, FaTrash } from 'react-icons/fa'
 import { useLocation } from 'react-router-dom'
 import styles from './Inventory.module.css'
@@ -40,7 +40,7 @@ const Inventory = () => {
   }, [products, searchQuery, selectedCategory, searchProducts])
   
   const handleSearch = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     // Search is already handled by the useEffect
   }
   

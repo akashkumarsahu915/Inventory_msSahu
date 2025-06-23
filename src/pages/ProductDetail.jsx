@@ -7,9 +7,7 @@ import styles from './ProductDetail.module.css'
 const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { products, updateProduct, deleteProduct } = useInventory()
-  
-  const [product, setProduct] = useState(null)
+  const { products,addProduct, updateProduct, deleteProduct } = useInventory()
   const [formData, setFormData] = useState({
     name: '',
     category: 'seeds',
@@ -22,36 +20,34 @@ const ProductDetail = () => {
   })
   
   // Load product data
-  useEffect(() => {
-    const foundProduct = products.find(p => p.id === id)
-    if (foundProduct) {
-      setProduct(foundProduct)
-      setFormData({
-        name: foundProduct.name,
-        category: foundProduct.category,
-        description: foundProduct.description,
-        price: foundProduct.price,
-        quantity: foundProduct.quantity,
-        unit: foundProduct.unit,
-        lowStockThreshold: foundProduct.lowStockThreshold,
-        imageUrl: foundProduct.imageUrl
-      })
-    } else if (id !== 'new') {
-      // Product not found and not creating new
-      navigate('/inventory')
-    }
-  }, [id, products, navigate])
+  // useEffect(() => {
+  //   const foundProduct = products.find(p => p.id === id)
+  //   if (foundProduct) {
+  //     setProduct(foundProduct)
+  //     setFormData({
+  //       name: foundProduct.name,
+  //       category: foundProduct.category,
+  //       description: foundProduct.description,
+  //       price: foundProduct.price,
+  //       quantity: foundProduct.quantity,
+  //       unit: foundProduct.unit,
+  //       lowStockThreshold: foundProduct.lowStockThreshold,
+  //       imageUrl: foundProduct.imageUrl
+  //     })
+  //   } else if (id !== 'new') {
+  //     // Product not found and not creating new
+  //     navigate('/inventory')
+  //   }
+  // }, [id, products, navigate])
   
   const handleChange = (e) => {
-    const { name, value, type } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? Number(value) : value
-    }))
+    const {name,value}=e.target;
+    setFormData({...formData,[name]:value})
   }
-  
   const handleSubmit = (e) => {
-    e.preventDefault()
+    const product =formData;
+    addProduct(product);
+
     
     if (id === 'new') {
       // Add new product logic will be implemented here
@@ -213,7 +209,7 @@ const ProductDetail = () => {
               </div>
             </div>
             
-            {!isNewProduct && product && (
+            {!isNewProduct && products && (
               <div className={styles.productPreview}>
                 <h3>Product Preview</h3>
                 <div className={styles.previewCard}>
