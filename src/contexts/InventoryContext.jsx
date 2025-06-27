@@ -15,7 +15,7 @@ export const InventoryProvider = ({ children }) => {
       try {
      const response=await axios.get("http://localhost:3000/admin/getAllProduct")
         setProducts(response.data.products);
-        console.log(response.data.products)
+        console.log(response.data)
       } catch (error) {
         setError("failed to load inventory data");
         console.log(error)
@@ -32,23 +32,35 @@ export const InventoryProvider = ({ children }) => {
 
     let response=axios.post("http://localhost:3000/admin/inventory/new",product);
     console.log(response);
-    // const newProduct = {
-    //   ...product,
-    //   id: Date.now().toString(),
-    //   createdAt: new Date().toISOString()
-    // }
-    // setProducts(prevProducts => [...prevProducts, newProduct])
-    // return newProduct
   }
 
   // Update an existing product
+  // const updateProduct = (id, updates) => {
+  //   setProducts(prevProducts =>
+  //     prevProducts.map(product =>
+  //       product.id === id ? { ...product, ...updates, updatedAt: new Date().toISOString() } : product
+  //     )
+  //   )
+  // }
   const updateProduct = (id, updates) => {
-    setProducts(prevProducts =>
-      prevProducts.map(product =>
-        product.id === id ? { ...product, ...updates, updatedAt: new Date().toISOString() } : product
-      )
-    )
-  }
+  // setProducts(previousList => {
+  //   return previousList.map(product => {
+  //     if (product.id === id) {
+  //       // Found the product to update
+  //       return {
+  //         ...product,            // keep all existing values
+  //         ...updates,            // apply the new changes
+  //         updatedAt: new Date().toISOString()  // add a new updated time
+  //       };
+  //     } else {
+  //       return product; // leave other products unchanged
+  //     }
+  //   });
+  // });
+
+  
+}
+
 
   // Delete a product
   const deleteProduct = (id) => {

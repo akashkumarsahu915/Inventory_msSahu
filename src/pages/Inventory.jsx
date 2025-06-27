@@ -120,7 +120,7 @@ const Inventory = () => {
               
               <div className={styles.productActions}>
                 <Link 
-                  to={`/inventory/${product.id}`} 
+                  to={`/inventory/${product._id}`} 
                   className={`btn btn-outline ${styles.editButton}`}
                 >
                   <FaEdit /> Edit

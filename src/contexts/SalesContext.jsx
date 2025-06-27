@@ -14,7 +14,7 @@ export const SalesProvider = ({ children }) => {
   const { updateStock } = useInventory()
 
   // Load mock data on initial render
-  
+
   useEffect(() => {
     const fetchSales = async () => {
       try {

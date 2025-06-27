@@ -50,7 +50,6 @@ const ProductDetail = () => {
 
     
     if (id === 'new') {
-      // Add new product logic will be implemented here
       navigate('/inventory')
     } else {
       // Update existing product
