@@ -11,15 +11,15 @@ export const InventoryProvider = ({ children }) => {
   // Load mock data on initial render
   useEffect(() => {
 
-    const fetchProducts =async()=>{
+    const fetchProducts = async () => {
       try {
-     const response=await axios.get("http://localhost:3000/admin/getAllProduct")
+        const response = await axios.get("http://localhost:3000/admin/getAllProduct")
         setProducts(response.data.products);
         console.log(response.data)
       } catch (error) {
         setError("failed to load inventory data");
         console.log(error)
-      }finally{
+      } finally {
         setLoading(false)
       }
 
@@ -29,42 +29,22 @@ export const InventoryProvider = ({ children }) => {
 
   // Add a new product
   const addProduct = (product) => {
-
-    let response=axios.post("http://localhost:3000/admin/inventory/new",product);
+    let response = axios.post("http://localhost:3000/admin/inventory/new", product);
     console.log(response);
   }
 
   // Update an existing product
-  // const updateProduct = (id, updates) => {
-  //   setProducts(prevProducts =>
-  //     prevProducts.map(product =>
-  //       product.id === id ? { ...product, ...updates, updatedAt: new Date().toISOString() } : product
-  //     )
-  //   )
-  // }
   const updateProduct = (id, updates) => {
-  // setProducts(previousList => {
-  //   return previousList.map(product => {
-  //     if (product.id === id) {
-  //       // Found the product to update
-  //       return {
-  //         ...product,            // keep all existing values
-  //         ...updates,            // apply the new changes
-  //         updatedAt: new Date().toISOString()  // add a new updated time
-  //       };
-  //     } else {
-  //       return product; // leave other products unchanged
-  //     }
-  //   });
-  // });
+    let responce = axios.put(`http://localhost:3000/admin/updateProduct/${id}`, updates);
+    console.log(responce);
+  }
 
-  
-}
 
 
   // Delete a product
   const deleteProduct = (id) => {
-    setProducts(prevProducts => prevProducts.filter(product => product.id !== id))
+    let response = axios.delete(`http://localhost:3000/admin/deleteProduct/${id}`);
+    console.log(response);
   }
 
   // Update stock quantity
@@ -72,10 +52,10 @@ export const InventoryProvider = ({ children }) => {
     setProducts(prevProducts =>
       prevProducts.map(product => {
         if (product.id === id) {
-          const newQuantity = type === 'decrease' 
+          const newQuantity = type === 'decrease'
             ? Math.max(0, product.quantity - quantity)
             : product.quantity + quantity
-          
+
           return {
             ...product,
             quantity: newQuantity,
@@ -100,9 +80,9 @@ export const InventoryProvider = ({ children }) => {
   // Search products
   const searchProducts = (query) => {
     if (!query) return products
-    
+
     const searchTerm = query.toLowerCase()
-    return products.filter(product => 
+    return products.filter(product =>
       product.name.toLowerCase().includes(searchTerm) ||
       product.category.toLowerCase().includes(searchTerm) ||
       product.description.toLowerCase().includes(searchTerm)

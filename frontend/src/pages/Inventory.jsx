@@ -50,7 +50,7 @@ const Inventory = () => {
   
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id)
+      deleteProduct(id);
     }
   }
   
@@ -117,7 +117,6 @@ const Inventory = () => {
                   {product.quantity} {product.unit} available
                 </div>
               </div>
-              
               <div className={styles.productActions}>
                 <Link 
                   to={`/inventory/${product._id}`} 
@@ -127,7 +126,7 @@ const Inventory = () => {
                 </Link>
                 <button 
                   className={`btn btn-outline ${styles.deleteButton}`}
-                  onClick={() => handleDelete(product.id)}
+                  onClick={() => handleDelete(product._id)}
                 >
                   <FaTrash /> Delete
                 </button>

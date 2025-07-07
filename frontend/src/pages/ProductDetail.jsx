@@ -7,7 +7,7 @@ import styles from './ProductDetail.module.css'
 const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { products,addProduct, updateProduct, deleteProduct } = useInventory()
+  const { products, addProduct, updateProduct, deleteProduct } = useInventory()
   const [formData, setFormData] = useState({
     name: '',
     category: 'seeds',
@@ -18,38 +18,16 @@ const ProductDetail = () => {
     lowStockThreshold: 10,
     imageUrl: ''
   })
-  
-  // Load product data
-  // useEffect(() => {
-  //   const foundProduct = products.find(p => p.id === id)
-  //   if (foundProduct) {
-  //     setProduct(foundProduct)
-  //     setFormData({
-  //       name: foundProduct.name,
-  //       category: foundProduct.category,
-  //       description: foundProduct.description,
-  //       price: foundProduct.price,
-  //       quantity: foundProduct.quantity,
-  //       unit: foundProduct.unit,
-  //       lowStockThreshold: foundProduct.lowStockThreshold,
-  //       imageUrl: foundProduct.imageUrl
-  //     })
-  //   } else if (id !== 'new') {
-  //     // Product not found and not creating new
-  //     navigate('/inventory')
-  //   }
-  // }, [id, products, navigate])
-  
-  const handleChange = (e) => {
-    const {name,value}=e.target;
-    setFormData({...formData,[name]:value})
-  }
-  const handleSubmit = (e) => {
-    const product =formData;
-    addProduct(product);
 
-    
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value })
+  }
+  const handleSubmit = () => {
+    const product = formData;
+    console.log('Product:', product);
     if (id === 'new') {
+      addProduct(product);
       navigate('/inventory')
     } else {
       // Update existing product
@@ -57,21 +35,22 @@ const ProductDetail = () => {
       navigate('/inventory')
     }
   }
-  
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+
+  const handleDelete = (id) => {
+    if (window.confirm(`Are you sure you want to delete this product?${id}`)) {
       deleteProduct(id)
       navigate('/inventory')
     }
   }
-  
+  //not working properly
+
   const isNewProduct = id === 'new'
   const title = isNewProduct ? 'Add New Product' : 'Edit Product'
-  
+
   return (
     <div className={styles.productDetail}>
       <div className={styles.header}>
-        <button 
+        <button
           className={`btn btn-outline ${styles.backButton}`}
           onClick={() => navigate('/inventory')}
         >
@@ -79,20 +58,20 @@ const ProductDetail = () => {
         </button>
         <h1>{title}</h1>
         {!isNewProduct && (
-          <button 
+          <button
             className={`btn btn-outline ${styles.deleteButton}`}
-            onClick={handleDelete}
+            onClick={()=>{handleDelete(id)}
+            }
           >
             <FaTrash /> Delete
           </button>
         )}
       </div>
-      
-      <form onSubmit={handleSubmit} className={styles.form}>
+
+      <form className={styles.form}>
         <div className={styles.formGrid}>
           <div className={styles.formSection}>
             <h2>Product Information</h2>
-            
             <div className={styles.formGroup}>
               <label htmlFor="name">Product Name</label>
               <input
@@ -104,7 +83,7 @@ const ProductDetail = () => {
                 required
               />
             </div>
-            
+
             <div className={styles.formGroup}>
               <label htmlFor="category">Category</label>
               <select
@@ -119,7 +98,7 @@ const ProductDetail = () => {
                 <option value="equipment">Equipment</option>
               </select>
             </div>
-            
+
             <div className={styles.formGroup}>
               <label htmlFor="description">Description</label>
               <textarea
@@ -130,7 +109,7 @@ const ProductDetail = () => {
                 rows="4"
               />
             </div>
-            
+
             <div className={styles.formGroup}>
               <label htmlFor="imageUrl">Image URL</label>
               <input
@@ -143,10 +122,10 @@ const ProductDetail = () => {
               />
             </div>
           </div>
-          
+
           <div className={styles.formSection}>
             <h2>Inventory Details</h2>
-            
+
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label htmlFor="price">Price (₹)</label>
@@ -161,7 +140,7 @@ const ProductDetail = () => {
                   required
                 />
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label htmlFor="quantity">Quantity</label>
                 <input
@@ -175,7 +154,7 @@ const ProductDetail = () => {
                 />
               </div>
             </div>
-            
+
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label htmlFor="unit">Unit</label>
@@ -193,7 +172,7 @@ const ProductDetail = () => {
                   <option value="box">Box</option>
                 </select>
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label htmlFor="lowStockThreshold">Low Stock Alert</label>
                 <input
@@ -207,7 +186,7 @@ const ProductDetail = () => {
                 />
               </div>
             </div>
-            
+
             {!isNewProduct && products && (
               <div className={styles.productPreview}>
                 <h3>Product Preview</h3>
@@ -227,16 +206,16 @@ const ProductDetail = () => {
             )}
           </div>
         </div>
-        
+
         <div className={styles.formActions}>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn btn-outline"
             onClick={() => navigate('/inventory')}
           >
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-primary" onClick={handleSubmit}>
             <FaSave /> Save Product
           </button>
         </div>
