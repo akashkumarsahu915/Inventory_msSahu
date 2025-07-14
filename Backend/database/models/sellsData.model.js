@@ -6,7 +6,7 @@ const sellsDataSchema= new mongoose.Schema({
         type:String
     },
     date:{type:Date}
-    ,items:[{productId:{type:Number,required:true},name:{required:true,type:String},quantity:{type:Number,required:true},price:{type:Number,required:true},total:{type:Number}}],
+    ,items:[{productId:{type:String,required:true},name:{required:true,type:String},quantity:{type:Number,required:true},price:{type:Number,required:true},total:{type:Number}}],
     subtotal:{type:Number,required:true},
     tax:{type:Number},
     Total:{type:Number,required:true},

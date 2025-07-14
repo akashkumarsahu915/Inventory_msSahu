@@ -11,28 +11,28 @@ const Sales = () => {
   const [dateRange, setDateRange] = useState('all')
   const [customDateFrom, setCustomDateFrom] = useState('')
   const [customDateTo, setCustomDateTo] = useState('')
-  
+
   useEffect(() => {
     if (!loading) {
       filterSales(dateRange)
     }
   }, [sales, loading, dateRange])
-  
+
   const filterSales = (range) => {
     let filtered = [...sales]
-    
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
+
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)
-    
+
     const lastWeekStart = new Date(today)
     lastWeekStart.setDate(lastWeekStart.getDate() - 7)
-    
+
     const lastMonthStart = new Date(today)
     lastMonthStart.setMonth(lastMonthStart.getMonth() - 1)
-    
+
     switch (range) {
       case 'today':
         filtered = sales.filter(sale => {
@@ -63,7 +63,7 @@ const Sales = () => {
           const fromDate = new Date(customDateFrom)
           const toDate = new Date(customDateTo)
           toDate.setHours(23, 59, 59, 999) // End of day
-          
+
           filtered = sales.filter(sale => {
             const saleDate = new Date(sale.date)
             return saleDate >= fromDate && saleDate <= toDate
@@ -74,32 +74,32 @@ const Sales = () => {
         // 'all' - no filtering needed
         break
     }
-    
+
     // Sort by date, newest first
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
-    
+
     setFilteredSales(filtered)
-    
+
   }
-  
+
   const handleDateRangeChange = (e) => {
     setDateRange(e.target.value)
   }
-  
+
   const handleCustomDateChange = () => {
     if (customDateFrom && customDateTo) {
       filterSales('custom')
     }
   }
-  
+
   const calculateTotal = () => {
     return filteredSales.reduce((total, sale) => total + sale.total, 0)
   }
-  
+
   if (loading) {
     return <div className={styles.loading}>Loading sales data...</div>
   }
-  
+
   return (
     <div className={styles.sales}>
       <div className={styles.header}>
@@ -108,7 +108,7 @@ const Sales = () => {
           <FaPlus /> New Sale
         </Link>
       </div>
-      
+
       <div className={styles.filters}>
         <div className={styles.dateFilter}>
           <div className={styles.filterIcon}>
@@ -123,13 +123,13 @@ const Sales = () => {
             <option value="custom">Custom Range</option>
           </select>
         </div>
-        
+
         {dateRange === 'custom' && (
           <div className={styles.customDateRange}>
             <div className={styles.dateInput}>
               <label htmlFor="dateFrom">From</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 id="dateFrom"
                 value={customDateFrom}
                 onChange={(e) => setCustomDateFrom(e.target.value)}
@@ -137,14 +137,14 @@ const Sales = () => {
             </div>
             <div className={styles.dateInput}>
               <label htmlFor="dateTo">To</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 id="dateTo"
                 value={customDateTo}
                 onChange={(e) => setCustomDateTo(e.target.value)}
               />
             </div>
-            <button 
+            <button
               className="btn btn-outline"
               onClick={handleCustomDateChange}
             >
@@ -152,12 +152,12 @@ const Sales = () => {
             </button>
           </div>
         )}
-        
+
         <button className={`btn btn-outline ${styles.exportButton}`}>
           <FaDownload /> Export
         </button>
       </div>
-      
+
       <div className={styles.salesSummary}>
         <div className={styles.summaryCard}>
           <h3>Total Sales</h3>
@@ -174,7 +174,7 @@ const Sales = () => {
           </p>
         </div>
       </div>
-      
+
       <div className={styles.salesTable}>
         <table>
           <thead>
@@ -192,7 +192,7 @@ const Sales = () => {
             {filteredSales.map(sale => (
               <tr key={sale.id}>
                 <td>INV-{sale.id}</td>
-                <td>{format(new Date(sale.date), 'MMM dd, yyyy HH:mm')}</td>
+                <td>{new Date(sale.date).toLocaleString()}</td>
                 <td>{sale.customer}</td>
                 <td>
                   {sale.items.length} {sale.items.length === 1 ? 'item' : 'items'}
@@ -213,7 +213,7 @@ const Sales = () => {
                 </td>
               </tr>
             ))}
-            
+
             {filteredSales.length === 0 && (
               <tr>
                 <td colSpan="7" className={styles.emptyMessage}>

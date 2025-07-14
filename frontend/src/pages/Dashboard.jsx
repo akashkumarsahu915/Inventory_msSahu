@@ -3,11 +3,11 @@ import { useSales } from '../contexts/SalesContext'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
-import { 
-  FaBoxOpen, 
-  FaShoppingCart, 
-  FaArrowUp, 
-  FaArrowDown, 
+import {
+  FaBoxOpen,
+  FaShoppingCart,
+  FaArrowUp,
+  FaArrowDown,
   FaExclamationTriangle,
   FaChartLine
 } from 'react-icons/fa'
@@ -37,19 +37,19 @@ ChartJS.register(
 
 const Dashboard = () => {
   const { products, getLowStockProducts } = useInventory()
-  const { 
-    sales, 
-    getTodaySales, 
+  const {
+    sales,
+    getTodaySales,
     calculateTotalSales,
     getSalesDataForCharts
   } = useSales()
-  
+
   const [salesData, setSalesData] = useState(null)
-  
+
   useEffect(() => {
     // Prepare sales chart data
     const chartData = getSalesDataForCharts('daily', 7)
-    
+
     setSalesData({
       labels: chartData.map(item => format(new Date(item.date), 'MMM dd')),
       datasets: [
@@ -64,22 +64,22 @@ const Dashboard = () => {
       ]
     })
   }, [getSalesDataForCharts])
-  
+
   const todaySales = getTodaySales()
   const todayTotal = calculateTotalSales(todaySales)
   const lowStockProducts = getLowStockProducts()
-  
+
   // Calculate total inventory value
   const totalInventoryValue = products.reduce((total, product) => {
     return total + (product.price * product.quantity)
   }, 0)
-  
+
   // Calculate total sales (all time)
   const totalSalesAmount = calculateTotalSales(sales)
-  
+
   // Calculate sales increase (demo purpose - would be calculated from actual data)
   const salesIncrease = 12.5 // Percentage
-  
+
   return (
     <div className={styles.dashboard}>
       <div className={styles.pageHeader}>
@@ -88,7 +88,7 @@ const Dashboard = () => {
           {format(new Date(), 'EEEE, MMMM dd, yyyy')}
         </span>
       </div>
-      
+
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
@@ -102,7 +102,7 @@ const Dashboard = () => {
             </span>
           </div>
         </div>
-        
+
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ backgroundColor: 'rgba(121, 85, 72, 0.1)' }}>
             <FaBoxOpen color="#795548" />
@@ -115,7 +115,7 @@ const Dashboard = () => {
             </span>
           </div>
         </div>
-        
+
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ backgroundColor: 'rgba(255, 152, 0, 0.1)' }}>
             <FaExclamationTriangle color="#FF9800" />
@@ -130,7 +130,7 @@ const Dashboard = () => {
             </span>
           </div>
         </div>
-        
+
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ backgroundColor: 'rgba(33, 150, 243, 0.1)' }}>
             <FaChartLine color="#2196F3" />
@@ -144,7 +144,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      
+
       <div className={styles.chartsRow}>
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
@@ -156,8 +156,8 @@ const Dashboard = () => {
             </select>
           </div>
           <div className={styles.chartContainer}>
-            {salesData && <Line 
-              data={salesData} 
+            {salesData && <Line
+              data={salesData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
@@ -184,14 +184,14 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      
+
       <div className={styles.contentRow}>
         <div className={styles.recentSales}>
           <div className={styles.sectionHeader}>
             <h2>Recent Sales</h2>
             <Link to="/sales" className={styles.viewAll}>View All</Link>
           </div>
-          
+
           <div className={styles.tableContainer}>
             <table className={styles.dataTable}>
               <thead>
@@ -206,7 +206,10 @@ const Dashboard = () => {
                 {sales.slice(0, 5).map(sale => (
                   <tr key={sale.id}>
                     <td>{sale.customer}</td>
-                    <td>{format(new Date(sale.date), 'MMM dd, HH:mm')}</td>
+                    <td>
+                      {sale.date ? format(new Date(sale.date), 'MMM dd, HH:mm') : 'N/A'}
+                    </td>
+
                     <td>{sale.items.length} items</td>
                     <td>₹{sale.total.toLocaleString()}</td>
                   </tr>
@@ -215,13 +218,13 @@ const Dashboard = () => {
             </table>
           </div>
         </div>
-        
+
         <div className={styles.lowStock}>
           <div className={styles.sectionHeader}>
             <h2>Low Stock Items</h2>
             <Link to="/inventory" className={styles.viewAll}>View All</Link>
           </div>
-          
+
           <div className={styles.lowStockItems}>
             {lowStockProducts.slice(0, 5).map(product => (
               <div key={product.id} className={styles.lowStockItem}>
@@ -231,9 +234,9 @@ const Dashboard = () => {
                 </div>
                 <div className={styles.stockInfo}>
                   <div className={styles.stockBar}>
-                    <div 
+                    <div
                       className={styles.stockLevel}
-                      style={{ 
+                      style={{
                         width: `${Math.min(100, (product.quantity / product.lowStockThreshold) * 100)}%`,
                         backgroundColor: product.quantity < 5 ? 'var(--color-error-500)' : 'var(--color-warning-500)'
                       }}
@@ -245,7 +248,7 @@ const Dashboard = () => {
                 </div>
               </div>
             ))}
-            
+
             {lowStockProducts.length === 0 && (
               <div className={styles.emptyState}>
                 <p>No low stock items currently.</p>

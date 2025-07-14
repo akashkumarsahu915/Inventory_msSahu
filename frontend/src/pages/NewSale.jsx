@@ -8,20 +8,20 @@ import styles from './NewSale.module.css'
 const NewSale = () => {
   const navigate = useNavigate()
   const { products, searchProducts } = useInventory()
-  const { addSale,sales } = useSales()
-  
+  const { addSale, sales } = useSales()
+
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [cartItems, setCartItems] = useState([])
   const [customer, setCustomer] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
-  
+
   // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const taxRate = 0.05 // 5% tax
   const taxAmount = subtotal * taxRate
   const total = subtotal + taxAmount
-  
+
   // Search products
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -31,20 +31,22 @@ const NewSale = () => {
       setSearchResults([])
     }
   }, [searchQuery, searchProducts])
-  
+
   const addToCart = (product) => {
-    const existingItem = cartItems.find(item => item.id === product.id)
+    const productId = product._id || product.id
+    const existingItem = cartItems.find(item => item.id === productId)
+    // console.log("Adding product:", product);
     if (existingItem) {
-      // Increase quantity if already in cart
-      setCartItems(cartItems.map(item => 
-        item.id === product.id 
+      // Increase quantity
+      setCartItems(cartItems.map(item =>
+        item.id === productId
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ))
     } else {
-      // Add new item to cart
+      // Add new item
       setCartItems([...cartItems, {
-        id: product.id,
+        id: productId,
         name: product.name,
         price: product.price,
         quantity: 1,
@@ -52,80 +54,84 @@ const NewSale = () => {
         maxQuantity: product.quantity // Available stock
       }])
     }
-    
+
+
     // Clear search after adding
     setSearchQuery('')
     setSearchResults([])
   }
-  
+
   const updateQuantity = (id, newQuantity) => {
     const item = cartItems.find(item => item.id === id)
-    
+
     if (item && newQuantity > 0 && newQuantity <= item.maxQuantity) {
-      setCartItems(cartItems.map(item => 
+      setCartItems(cartItems.map(item =>
         item.id === id ? { ...item, quantity: newQuantity } : item
       ))
     }
   }
-  
+
   const removeItem = (id) => {
     setCartItems(cartItems.filter(item => item.id !== id))
   }
-  
+
   const handleCompleteSale = () => {
     if (cartItems.length === 0) {
       alert('Please add at least one item to the cart')
       return
     }
-    
+
     if (!customer.trim()) {
       alert('Please enter customer name')
       return
     }
-    
+
     // Create sale object
-    const sale = {
-      customer: customer,
-      items: cartItems.map(item => ({
-        productId: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        total: item.price * item.quantity
-      })),
-      subtotal,
-      tax: taxAmount,
-      total,
-      paymentMethod
-    }
-    
+   const sale = {
+  customer: customer,
+  items: cartItems.map(item => ({
+    productId: item.id,
+    name: item.name,
+    quantity: item.quantity,
+    price: item.price,
+    total: item.price * item.quantity
+  })),
+  subtotal,
+  tax: taxAmount,
+  Total: total, // ✅ Capital "T" to match backend
+  paymentMethod,
+  date: new Date().toISOString()
+}
+
+    console.log("Sale object:", sale)
+
     // Add sale to context
     addSale(sale)
-    
+
     // Navigate back to sales page
     navigate('/sales')
   }
-  
+
   return (
     <div className={styles.newSale}>
       <div className={styles.header}>
         <h1>New Sale</h1>
       </div>
-      
+
       <div className={styles.saleContainer}>
         <div className={styles.productSearch}>
           <h2>Add Products</h2>
-          
+
           <div className={styles.searchBox}>
             <FaSearch className={styles.searchIcon} />
-            <input 
-              type="text" 
-              placeholder="Search products by name..." 
+            <input
+              type="text"
+              placeholder="Search products by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
+
           {searchResults.length > 0 && (
             <div className={styles.searchResults}>
               {searchResults.map(product => (
@@ -139,8 +145,8 @@ const NewSale = () => {
                       </span>
                     </div>
                   </div>
-                  
-                  <button 
+
+                  <button
                     className={`btn btn-outline ${styles.addButton}`}
                     onClick={() => addToCart(product)}
                     disabled={product.quantity === 0}
@@ -151,7 +157,7 @@ const NewSale = () => {
               ))}
             </div>
           )}
-          
+
           <div className={styles.categoriesGrid}>
             <h3>Categories</h3>
             <div className={styles.categories}>
@@ -167,15 +173,15 @@ const NewSale = () => {
             </div>
           </div>
         </div>
-        
+
         <div className={styles.cart}>
           <h2>Current Sale</h2>
-          
+
           <div className={styles.customerDetails}>
             <div className={styles.formGroup}>
               <label htmlFor="customer">Customer Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="customer"
                 value={customer}
                 onChange={(e) => setCustomer(e.target.value)}
@@ -183,10 +189,10 @@ const NewSale = () => {
                 required
               />
             </div>
-            
+
             <div className={styles.formGroup}>
               <label htmlFor="paymentMethod">Payment Method</label>
-              <select 
+              <select
                 id="paymentMethod"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
@@ -198,7 +204,7 @@ const NewSale = () => {
               </select>
             </div>
           </div>
-          
+
           <div className={styles.cartItems}>
             {cartItems.length === 0 ? (
               <div className={styles.emptyCart}>
@@ -223,14 +229,14 @@ const NewSale = () => {
                       <td>₹{item.price.toLocaleString()}</td>
                       <td>
                         <div className={styles.quantityControl}>
-                          <button 
+                          <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             disabled={item.quantity <= 1}
                           >
                             <FaMinus />
                           </button>
                           <span>{item.quantity}</span>
-                          <button 
+                          <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             disabled={item.quantity >= item.maxQuantity}
                           >
@@ -240,7 +246,7 @@ const NewSale = () => {
                       </td>
                       <td>₹{(item.price * item.quantity).toLocaleString()}</td>
                       <td>
-                        <button 
+                        <button
                           className={styles.removeButton}
                           onClick={() => removeItem(item.id)}
                         >
@@ -253,7 +259,7 @@ const NewSale = () => {
               </table>
             )}
           </div>
-          
+
           <div className={styles.cartSummary}>
             <div className={styles.summaryRow}>
               <span>Subtotal</span>
@@ -268,15 +274,15 @@ const NewSale = () => {
               <span>₹{total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
             </div>
           </div>
-          
+
           <div className={styles.cartActions}>
-            <button 
+            <button
               className="btn btn-outline"
               onClick={() => navigate('/sales')}
             >
               Cancel
             </button>
-            <button 
+            <button
               className="btn btn-primary"
               onClick={handleCompleteSale}
               disabled={cartItems.length === 0}

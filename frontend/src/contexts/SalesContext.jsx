@@ -31,26 +31,14 @@ export const SalesProvider = ({ children }) => {
       }
     }
     fetchSales()
+  
   }, [])
 
 
   // Add a new sale
-  const addSale = (sale) => {
-    const newSale = {
-      ...sale,
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      status: 'completed'
-    }
-
-    setSales(prevSales => [...prevSales, newSale])
-
-    // Update product stock levels
-    sale.items.forEach(item => {
-      updateStock(item.productId, item.quantity, 'decrease')
-    })
-
-    return newSale
+  const addSale = async(sale) => {
+    const responce = await axios.post("http://localhost:3000/admin/sellproduct", sale)
+    console.log(responce)
   }
 
   // Get sales for a specific date range
@@ -67,9 +55,13 @@ export const SalesProvider = ({ children }) => {
     const todayString = format(today, 'yyyy-MM-dd')
 
     return sales.filter(sale => {
-      const saleDate = format(new Date(sale.date), 'yyyy-MM-dd')
-      return saleDate === todayString
-    })
+      if (!sale.date) return false; // 👈 skip if date is missing
+      const parsedDate = new Date(sale.date);
+      if (isNaN(parsedDate)) return false; // 👈 skip if invalid
+      const saleDate = format(parsedDate, 'yyyy-MM-dd');
+      return saleDate === todayString;
+    });
+
   }
 
   // Calculate total sales amount for a given date range
@@ -97,12 +89,17 @@ export const SalesProvider = ({ children }) => {
 
     // Group by date (for daily view)
     recentSales.forEach(sale => {
-      const dateStr = format(new Date(sale.date), 'yyyy-MM-dd')
-      if (!salesData[dateStr]) {
-        salesData[dateStr] = 0
-      }
-      salesData[dateStr] += sale.total
-    })
+  if (!sale.date) return;
+  const parsedDate = new Date(sale.date);
+  if (isNaN(parsedDate)) return;
+
+  const dateStr = format(parsedDate, 'yyyy-MM-dd');
+  if (!salesData[dateStr]) {
+    salesData[dateStr] = 0;
+  }
+  salesData[dateStr] += sale.total;
+});
+
 
     // Convert to array and limit to requested number of data points
     const chartData = Object.entries(salesData)
