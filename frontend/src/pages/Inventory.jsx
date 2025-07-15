@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useInventory } from '../contexts/InventoryContext.jsx'
 import { FaPlus, FaSearch, FaFilter, FaEdit, FaTrash } from 'react-icons/fa'
-import { useLocation } from 'react-router-dom'
 import styles from './Inventory.module.css'
 
 const Inventory = () => {
   const location = useLocation()
-  const { products, loading, deleteProduct, getProductsByCategory, searchProducts } = useInventory()
-  
+  const {
+    products,
+    loading,
+    deleteProduct,
+    getProductsByCategory,
+    searchProducts
+  } = useInventory()
+
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [filteredProducts, setFilteredProducts] = useState([])
-  
+
   // Get search query from URL if present
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -21,43 +26,45 @@ const Inventory = () => {
       setSearchQuery(search)
     }
   }, [location.search])
-  
-  // Apply filters when products, search query or category changes
+
+  // Apply filters safely when products/search/category change
   useEffect(() => {
-    let result = [...products]
-    
+    let result = Array.isArray(products) ? [...products] : []
+
     // Filter by search query
-    if (searchQuery) {
+    if (searchQuery && typeof searchProducts === 'function') {
       result = searchProducts(searchQuery)
     }
-    
+
     // Filter by category
     if (selectedCategory !== 'all') {
-      result = result.filter(product => product.category === selectedCategory)
+      result = result.filter(
+        product => product.category === selectedCategory
+      )
     }
-    
+
     setFilteredProducts(result)
   }, [products, searchQuery, selectedCategory, searchProducts])
-  
+
   const handleSearch = (e) => {
-    e.preventDefault();
-    // Search is already handled by the useEffect
+    e.preventDefault()
+    // Filtering handled by useEffect
   }
-  
+
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value)
   }
-  
+
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id);
+      deleteProduct(id)
     }
   }
-  
+
   if (loading) {
     return <div className={styles.loading}>Loading inventory...</div>
   }
-  
+
   return (
     <div className={styles.inventory}>
       <div className={styles.header}>
@@ -66,20 +73,20 @@ const Inventory = () => {
           <FaPlus /> Add Product
         </Link>
       </div>
-      
+
       <div className={styles.filters}>
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <div className={styles.searchInput}>
             <FaSearch className={styles.searchIcon} />
-            <input 
-              type="text" 
-              placeholder="Search products..." 
+            <input
+              type="text"
+              placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </form>
-        
+
         <div className={styles.categoryFilter}>
           <div className={styles.filterIcon}>
             <FaFilter />
@@ -92,39 +99,39 @@ const Inventory = () => {
           </select>
         </div>
       </div>
-      
+
       <div className={styles.productsGrid}>
-        {filteredProducts.map(product => (
-          <div key={product.id} className={styles.productCard}>
+        {(Array.isArray(filteredProducts) ? filteredProducts : []).map(product => (
+          <div key={product._id} className={styles.productCard}>
             <div className={styles.productImage}>
               <img src={product.imageUrl} alt={product.name} />
               <div className={styles.productCategory}>{product.category}</div>
-              
+
               {product.quantity <= product.lowStockThreshold && (
                 <div className={styles.lowStockBadge}>
                   Low Stock
                 </div>
               )}
             </div>
-            
+
             <div className={styles.productInfo}>
               <h3>{product.name}</h3>
               <p className={styles.productDescription}>{product.description}</p>
-              
+
               <div className={styles.productMeta}>
-                <div className={styles.price}>₹{product.price.toLocaleString()}</div>
+                <div className={styles.price}>₹{product.price?.toLocaleString()}</div>
                 <div className={styles.stock}>
                   {product.quantity} {product.unit} available
                 </div>
               </div>
               <div className={styles.productActions}>
-                <Link 
-                  to={`/inventory/${product._id}`} 
+                <Link
+                  to={`/inventory/${product._id}`}
                   className={`btn btn-outline ${styles.editButton}`}
                 >
                   <FaEdit /> Edit
                 </Link>
-                <button 
+                <button
                   className={`btn btn-outline ${styles.deleteButton}`}
                   onClick={() => handleDelete(product._id)}
                 >
@@ -134,7 +141,7 @@ const Inventory = () => {
             </div>
           </div>
         ))}
-        
+
         {filteredProducts.length === 0 && (
           <div className={styles.emptyState}>
             <h3>No products found</h3>
