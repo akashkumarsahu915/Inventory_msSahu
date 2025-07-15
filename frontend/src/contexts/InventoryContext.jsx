@@ -13,7 +13,10 @@ export const InventoryProvider = ({ children }) => {
 
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("https://mssahu-inventory-backend.onrender.com/admin/getAllProduct")
+        const response = await axios.get("https://mssahu-inventory-backend.onrender.com/admin/getAllSellProduct", {
+  withCredentials: true
+});
+
         setProducts(response.data.products);
         console.log(response.data)
       } catch (error) {
