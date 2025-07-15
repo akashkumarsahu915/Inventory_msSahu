@@ -28,7 +28,7 @@ import styles from './Dashboard.module.css'
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
+ PointElement,
   LineElement,
   Title,
   Tooltip,
@@ -37,7 +37,6 @@ ChartJS.register(
 
 const Dashboard = () => {
   const { products, loading, getLowStockProducts } = useInventory();
-
   const {
     sales,
     getTodaySales,
@@ -48,7 +47,6 @@ const Dashboard = () => {
   const [salesData, setSalesData] = useState(null)
 
   useEffect(() => {
-    // Prepare sales chart data
     const chartData = getSalesDataForCharts('daily', 7)
 
     setSalesData({
@@ -66,24 +64,21 @@ const Dashboard = () => {
     })
   }, [getSalesDataForCharts])
 
-  const todaySales = getTodaySales()
+  // Safely default critical data
+  const todaySales = getTodaySales() || []
+  const safeProducts = Array.isArray(products) ? products : []
+  const lowStockProducts = getLowStockProducts() || []
+  const safeSales = Array.isArray(sales) ? sales : []
+
   const todayTotal = calculateTotalSales(todaySales)
 
-if (loading) return <div>Loading Dashboard...</div>; 
+  if (loading) return <div>Loading Dashboard...</div>
 
-const lowStockProducts = getLowStockProducts();
-
-  // Calculate total inventory value
-  const totalInventoryValue = Array.isArray(products)
-  ? products.reduce((total, product) => total + (product.price * product.quantity), 0)
-  : 0;
-
-
-  // Calculate total sales (all time)
-  const totalSalesAmount = calculateTotalSales(sales)
-
-  // Calculate sales increase (demo purpose - would be calculated from actual data)
-  const salesIncrease = 12.5 // Percentage
+  const totalInventoryValue = safeProducts.reduce(
+    (total, product) => total + (product.price * product.quantity), 0
+  )
+  const totalSalesAmount = calculateTotalSales(safeSales)
+  const salesIncrease = 12.5 // Placeholder %
 
   return (
     <div className={styles.dashboard}>
@@ -116,7 +111,7 @@ const lowStockProducts = getLowStockProducts();
             <h3>Inventory Value</h3>
             <p className={styles.statValue}>₹{totalInventoryValue.toLocaleString()}</p>
             <span className={styles.statMeta}>
-              {products.length} products
+              {safeProducts.length} products
             </span>
           </div>
         </div>
@@ -208,17 +203,20 @@ const lowStockProducts = getLowStockProducts();
                 </tr>
               </thead>
               <tbody>
-                {sales.slice(0, 5).map(sale => (
-                  <tr key={sale.id}>
-                    <td>{sale.customer}</td>
-                    <td>
-                      {sale.date ? format(new Date(sale.date), 'MMM dd, HH:mm') : 'N/A'}
-                    </td>
-
-                    <td>{sale.items.length} items</td>
-                    <td>₹{sale.total.toLocaleString()}</td>
-                  </tr>
-                ))}
+                {safeSales.length > 0 ? (
+                  safeSales.slice(0, 5).map(sale => (
+                    <tr key={sale.id}>
+                      <td>{sale.customer}</td>
+                      <td>
+                        {sale.date ? format(new Date(sale.date), 'MMM dd, HH:mm') : 'N/A'}
+                      </td>
+                      <td>{sale.items?.length || 0} items</td>
+                      <td>₹{sale.total.toLocaleString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan="4">No recent sales</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -231,30 +229,30 @@ const lowStockProducts = getLowStockProducts();
           </div>
 
           <div className={styles.lowStockItems}>
-            {lowStockProducts.slice(0, 5).map(product => (
-              <div key={product.id} className={styles.lowStockItem}>
-                <div className={styles.productInfo}>
-                  <h3>{product.name}</h3>
-                  <span className={styles.category}>{product.category}</span>
-                </div>
-                <div className={styles.stockInfo}>
-                  <div className={styles.stockBar}>
-                    <div
-                      className={styles.stockLevel}
-                      style={{
-                        width: `${Math.min(100, (product.quantity / product.lowStockThreshold) * 100)}%`,
-                        backgroundColor: product.quantity < 5 ? 'var(--color-error-500)' : 'var(--color-warning-500)'
-                      }}
-                    ></div>
+            {lowStockProducts.length > 0 ? (
+              lowStockProducts.slice(0, 5).map(product => (
+                <div key={product.id} className={styles.lowStockItem}>
+                  <div className={styles.productInfo}>
+                    <h3>{product.name}</h3>
+                    <span className={styles.category}>{product.category}</span>
                   </div>
-                  <span className={styles.stockText}>
-                    {product.quantity} {product.unit} left
-                  </span>
+                  <div className={styles.stockInfo}>
+                    <div className={styles.stockBar}>
+                      <div
+                        className={styles.stockLevel}
+                        style={{
+                          width: `${Math.min(100, (product.quantity / product.lowStockThreshold) * 100)}%`,
+                          backgroundColor: product.quantity < 5 ? 'var(--color-error-500)' : 'var(--color-warning-500)'
+                        }}
+                      ></div>
+                    </div>
+                    <span className={styles.stockText}>
+                      {product.quantity} {product.unit} left
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-
-            {lowStockProducts.length === 0 && (
+              ))
+            ) : (
               <div className={styles.emptyState}>
                 <p>No low stock items currently.</p>
               </div>
