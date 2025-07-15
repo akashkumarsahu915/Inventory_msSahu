@@ -36,7 +36,8 @@ ChartJS.register(
 )
 
 const Dashboard = () => {
-  const { products, getLowStockProducts } = useInventory()
+  const { products, loading, getLowStockProducts } = useInventory();
+
   const {
     sales,
     getTodaySales,
@@ -67,12 +68,16 @@ const Dashboard = () => {
 
   const todaySales = getTodaySales()
   const todayTotal = calculateTotalSales(todaySales)
-  const lowStockProducts = getLowStockProducts()
+
+if (loading) return <div>Loading Dashboard...</div>; 
+
+const lowStockProducts = getLowStockProducts();
 
   // Calculate total inventory value
-  const totalInventoryValue = products.reduce((total, product) => {
-    return total + (product.price * product.quantity)
-  }, 0)
+  const totalInventoryValue = Array.isArray(products)
+  ? products.reduce((total, product) => total + (product.price * product.quantity), 0)
+  : 0;
+
 
   // Calculate total sales (all time)
   const totalSalesAmount = calculateTotalSales(sales)
