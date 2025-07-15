@@ -8,8 +8,12 @@ export const SalesProvider = ({ children }) => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+// ... other imports
+const SalesProvider = ({ children }) => {
+  const [sales, setSales] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch all sales from the server
   useEffect(() => {
     const fetchSales = async () => {
       try {
@@ -31,7 +35,6 @@ export const SalesProvider = ({ children }) => {
     fetchSales();
   }, []);
 
-  // Add a new sale
   const addSale = async (sale) => {
     try {
       const res = await axios.post(
@@ -40,7 +43,7 @@ export const SalesProvider = ({ children }) => {
         { withCredentials: true }
       );
 
-      const newSale = res.data.sale || sale; // fallback if API doesn’t return new sale
+      const newSale = res.data.sale || sale;
       setSales((prev) => [...prev, newSale]);
       console.log('New sale added:', newSale);
     } catch (err) {
@@ -48,7 +51,6 @@ export const SalesProvider = ({ children }) => {
     }
   };
 
-  // Get sales within a specific date range
   const getSalesByDateRange = (start, end) => {
     if (!Array.isArray(sales)) return [];
     return sales.filter((sale) => {
@@ -57,9 +59,13 @@ export const SalesProvider = ({ children }) => {
     });
   };
 
-  // Calculate total sales in a range
   const calculateTotalSales = (salesList = []) => {
     return salesList.reduce((sum, sale) => sum + sale.total, 0);
+  };
+
+  const getTodaySales = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return sales.filter((sale) => sale.date?.startsWith(today));
   };
 
   const value = {
@@ -68,8 +74,12 @@ export const SalesProvider = ({ children }) => {
     error,
     addSale,
     getSalesByDateRange,
-    calculateTotalSales
+    calculateTotalSales,
+    getTodaySales // ✅ now available in Dashboard
   };
+
+  return <SalesContext.Provider value={value}>{children}</SalesContext.Provider>;
+};
 
   return <SalesContext.Provider value={value}>{children}</SalesContext.Provider>;
 };
