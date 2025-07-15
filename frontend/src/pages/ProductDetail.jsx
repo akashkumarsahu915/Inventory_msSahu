@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useInventory } from '../contexts/InventoryContext'
-import { FaSave, FaArrowLeft, FaTrash } from 'react-icons/fa'
-import styles from './ProductDetail.module.css'
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useInventory } from '../contexts/InventoryContext';
+import { FaSave, FaArrowLeft, FaTrash } from 'react-icons/fa';
+import styles from './ProductDetail.module.css';
 
 const ProductDetail = () => {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { products, addProduct, updateProduct, deleteProduct } = useInventory()
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { products, addProduct, updateProduct, deleteProduct } = useInventory();
+
+  const isNewProduct = id === 'new';
+  const title = isNewProduct ? 'Add New Product' : 'Edit Product';
+
   const [formData, setFormData] = useState({
     name: '',
     category: 'seeds',
@@ -17,35 +21,47 @@ const ProductDetail = () => {
     unit: 'kg',
     lowStockThreshold: 10,
     imageUrl: ''
-  })
+  });
+
+  useEffect(() => {
+    if (!isNewProduct && products?.length) {
+      const existingProduct = products.find(p => p._id === id);
+      if (existingProduct) {
+        setFormData(existingProduct);
+      }
+    }
+  }, [id, isNewProduct, products]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value })
-  }
-  const handleSubmit = () => {
-    const product = formData;
-    console.log('Product:', product);
-    if (id === 'new') {
-      addProduct(product);
-      navigate('/inventory')
-    } else {
-      // Update existing product
-      updateProduct(id, formData)
-      navigate('/inventory')
-    }
-  }
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'price' || name === 'quantity' || name === 'lowStockThreshold'
+        ? Number(value)
+        : value
+    }));
+  };
 
-  const handleDelete = (id) => {
-    if (window.confirm(`Are you sure you want to delete this product?${id}`)) {
-      deleteProduct(id)
-      navigate('/inventory')
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (isNewProduct) {
+        await addProduct(formData);
+      } else {
+        await updateProduct(id, formData);
+      }
+      navigate('/inventory');
+    } catch (err) {
+      console.error('Product submission failed:', err);
     }
-  }
-  //not working properly
+  };
 
-  const isNewProduct = id === 'new'
-  const title = isNewProduct ? 'Add New Product' : 'Edit Product'
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      await deleteProduct(id);
+      navigate('/inventory');
+    }
+  };
 
   return (
     <div className={styles.productDetail}>
@@ -60,15 +76,14 @@ const ProductDetail = () => {
         {!isNewProduct && (
           <button
             className={`btn btn-outline ${styles.deleteButton}`}
-            onClick={()=>{handleDelete(id)}
-            }
+            onClick={handleDelete}
           >
             <FaTrash /> Delete
           </button>
         )}
       </div>
 
-      <form className={styles.form}>
+      <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.formGrid}>
           <div className={styles.formSection}>
             <h2>Product Information</h2>
@@ -187,7 +202,7 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {!isNewProduct && products && (
+            {!isNewProduct && (
               <div className={styles.productPreview}>
                 <h3>Product Preview</h3>
                 <div className={styles.previewCard}>
@@ -199,7 +214,9 @@ const ProductDetail = () => {
                   <div className={styles.previewInfo}>
                     <h4>{formData.name}</h4>
                     <p className={styles.previewPrice}>₹{formData.price.toLocaleString()}</p>
-                    <p className={styles.previewStock}>Stock: {formData.quantity} {formData.unit}</p>
+                    <p className={styles.previewStock}>
+                      Stock: {formData.quantity} {formData.unit}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -215,13 +232,13 @@ const ProductDetail = () => {
           >
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary" onClick={handleSubmit}>
+          <button type="submit" className="btn btn-primary">
             <FaSave /> Save Product
           </button>
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default ProductDetail
+export default ProductDetail;
