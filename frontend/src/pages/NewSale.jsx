@@ -7,8 +7,8 @@ import styles from './NewSale.module.css';
 
 const NewSale = () => {
   const navigate = useNavigate();
-  const { products = [], searchProducts } = useInventory();
-  const { addSale, sales = [] } = useSales();
+  const { products = [], updateStock } = useInventory();
+  const { addSale } = useSales();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -16,36 +16,34 @@ const NewSale = () => {
   const [customer, setCustomer] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
 
-  const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const taxRate = 0.05;
-  const taxAmount = subtotal * taxRate;
-  const total = subtotal + taxAmount;
-
-  // Update search results
   useEffect(() => {
     if (searchQuery.trim()) {
-      setSearchResults(searchProducts(searchQuery));
+      const query = searchQuery.toLowerCase();
+      const results = products.filter(product =>
+        product.name.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query)
+      );
+      setSearchResults(results);
     } else {
       setSearchResults([]);
     }
-  }, [searchQuery, searchProducts]);
+  }, [searchQuery, products]);
 
   const addToCart = (product) => {
     const productId = product._id || product.id;
-    const existing = cartItems.find(i => i.id === productId);
+    const existing = cartItems.find(item => item.id === productId);
 
     if (existing) {
-      setCartItems(cartItems.map(i =>
-        i.id === productId ? { ...i, quantity: i.quantity + 1 } : i
-      ));
+      updateQuantity(productId, existing.quantity + 1);
     } else {
       setCartItems([...cartItems, {
         id: productId,
-        name: product.name || 'Unnamed',
-        price: product.price || 0,
-        unit: product.unit || '',
-        maxQuantity: product.quantity || 0,
+        name: product.name,
+        price: product.price,
         quantity: 1,
+        maxQuantity: product.quantity,
+        unit: product.unit
       }]);
     }
 
@@ -53,107 +51,26 @@ const NewSale = () => {
     setSearchResults([]);
   };
 
-  const updateQuantity = (id, newQty) => {
-    setCartItems(cartItems.map(item =>
-      item.id === id ? { ...item, quantity: Math.max(1, Math.min(item.maxQuantity, newQty)) } : item
-    ));
-  };
-
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter(i => i.id !== id));
-  };
-
-  const handleCompleteSale = () => {
-    if (!cartItems.length) {
-      return alert('Add at least one item');
-    }
-    if (!customer.trim()) {
-      return alert('Enter customer name');
-    }
-
-    const sale = {
-      id: Date.now().toString(),
-      customer,
-      paymentMethod,
-      items: cartItems.map(i => ({
-        productId: i.id,
-        name: i.name,
-        quantity: i.quantity,
-        price: i.price,
-        total: i.price * i.quantity
-      })),
-      subtotal,
-      tax: taxAmount,
-      total,
-      date: new Date().toISOString()
-    };
-
-    addSale(sale);
-    navigate('/sales');
-  };
-
-  return (
-    import { useEffect, useState } from 'react'
-import { useInventory } from '../contexts/InventoryContext'
-import { useSales } from '../contexts/SalesContext'
-import { FaPlus, FaMinus, FaTrash, FaSearch } from 'react-icons/fa'
-import { useNavigate } from 'react-router-dom'
-import styles from './NewSale.module.css'
-
-const NewSale = () => {
-  const { products, updateStock } = useInventory()
-  const { addSale } = useSales()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState([])
-  const [cartItems, setCartItems] = useState([])
-  const [customer, setCustomer] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('cash')
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      const results = products.filter(product =>
-        product.name.toLowerCase().includes(query) ||
-        product.category.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query)
-      )
-      setSearchResults(results)
-    } else {
-      setSearchResults([])
-    }
-  }, [searchQuery, products])
-
-  const addToCart = (product) => {
-    const existing = cartItems.find(item => item.id === product._id || item.id === product.id)
-    if (existing) {
-      updateQuantity(existing.id, existing.quantity + 1)
-    } else {
-      setCartItems([...cartItems, {
-        id: product._id || product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        maxQuantity: product.quantity
-      }])
-    }
-  }
-
   const updateQuantity = (id, quantity) => {
     setCartItems(prev =>
-      prev.map(item => item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item)
-    )
-  }
+      prev.map(item =>
+        item.id === id ? { ...item, quantity: Math.max(1, Math.min(item.maxQuantity, quantity)) } : item
+      )
+    );
+  };
 
   const removeItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id))
-  }
+    setCartItems(prev => prev.filter(item => item.id !== id));
+  };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const taxAmount = subtotal * 0.05
-  const total = subtotal + taxAmount
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const taxAmount = subtotal * 0.05;
+  const total = subtotal + taxAmount;
 
   const handleCompleteSale = async () => {
+    if (!cartItems.length) return alert('Add at least one item');
+    if (!customer.trim()) return alert('Enter customer name');
+
     const sale = {
       customer,
       paymentMethod,
@@ -162,16 +79,16 @@ const NewSale = () => {
       tax: taxAmount,
       total,
       date: new Date().toISOString()
-    }
+    };
 
     try {
-      await addSale(sale)
-      cartItems.forEach(item => updateStock(item.id, item.quantity, 'decrease'))
-      navigate('/sales')
+      await addSale(sale);
+      cartItems.forEach(item => updateStock(item.id, item.quantity, 'decrease'));
+      navigate('/sales');
     } catch (err) {
-      console.error('Sale submission failed', err)
+      console.error('Sale submission failed', err);
     }
-  }
+  };
 
   return (
     <div className={styles.newSale}>
@@ -180,9 +97,9 @@ const NewSale = () => {
       </div>
 
       <div className={styles.saleContainer}>
+        {/* Product Search */}
         <div className={styles.productSearch}>
           <h2>Add Products</h2>
-
           <div className={styles.searchBox}>
             <FaSearch className={styles.searchIcon} />
             <input
@@ -206,7 +123,6 @@ const NewSale = () => {
                       </span>
                     </div>
                   </div>
-
                   <button
                     className={`btn btn-outline ${styles.addButton}`}
                     onClick={() => addToCart(product)}
@@ -229,6 +145,7 @@ const NewSale = () => {
           </div>
         </div>
 
+        {/* Cart Panel */}
         <div className={styles.cart}>
           <h2>Current Sale</h2>
 
@@ -241,7 +158,6 @@ const NewSale = () => {
                 value={customer}
                 onChange={(e) => setCustomer(e.target.value)}
                 placeholder="Enter customer name"
-                required
               />
             </div>
 
@@ -342,11 +258,6 @@ const NewSale = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-export default NewSale;
-
   );
 };
 
