@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv'; 
-import { ConnectDb } from './database/connectdb.js';
+import { ConnectDb } from './database/Connectdb.js';
 
 import router from './route/AddProduct.js';
 import cors from "cors";
