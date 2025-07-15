@@ -31,8 +31,7 @@ const ProductDetail = () => {
       }
     }
   }, [id, isNewProduct, products]);
-
-  const handleChange = (e) => {
+const handleChange = (e) => {
   try {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -45,6 +44,7 @@ const ProductDetail = () => {
     console.error("handleChange error:", err);
   }
 };
+
 
 
   const handleSubmit = async (e) => {
