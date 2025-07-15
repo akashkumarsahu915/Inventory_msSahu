@@ -13,7 +13,7 @@ export const InventoryProvider = ({ children }) => {
 
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/admin/getAllProduct")
+        const response = await axios.get("https://mssahu-inventory-backend.onrender.com/admin/getAllProduct")
         setProducts(response.data.products);
         console.log(response.data)
       } catch (error) {
@@ -29,13 +29,13 @@ export const InventoryProvider = ({ children }) => {
 
   // Add a new product
   const addProduct = (product) => {
-    let response = axios.post("http://localhost:3000/admin/inventory/new", product);
+    let response = axios.post("https://mssahu-inventory-backend.onrender.com/admin/inventory/new", product);
     console.log(response);
   }
 
   // Update an existing product
   const updateProduct = (id, updates) => {
-    let responce = axios.put(`http://localhost:3000/admin/updateProduct/${id}`, updates);
+    let responce = axios.put(`https://mssahu-inventory-backend.onrender.com/admin/updateProduct/${id}`, updates);
     console.log(responce);
   }
 
@@ -43,7 +43,7 @@ export const InventoryProvider = ({ children }) => {
 
   // Delete a product
   const deleteProduct = (id) => {
-    let response = axios.delete(`http://localhost:3000/admin/deleteProduct/${id}`);
+    let response = axios.delete(`https://mssahu-inventory-backend.onrender.com/admin/deleteProduct/${id}`);
     console.log(response);
   }
 
