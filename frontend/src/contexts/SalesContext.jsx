@@ -13,7 +13,7 @@ export const SalesProvider = ({ children }) => {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const res = await axios.get('https://mssahu-inventory-backend.onrender.com/admin/sales', {
+        const res = await axios.get('https://mssahu-inventory-backend.onrender.com/admin/getAllSellProduct', {
           withCredentials: true
         });
 
