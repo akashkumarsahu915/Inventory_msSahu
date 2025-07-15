@@ -71,9 +71,11 @@ export const InventoryProvider = ({ children }) => {
   }
 
   // Get low stock products
-  const getLowStockProducts = (threshold = 10) => {
-    return products.filter(product => product.quantity <= threshold)
-  }
+ const getLowStockProducts = (threshold = 10) => {
+  if (!Array.isArray(products)) return []; // 👈 prevents crash
+  return products.filter(product => product.quantity <= threshold);
+}
+
 
   // Get products by category
   const getProductsByCategory = (category) => {
