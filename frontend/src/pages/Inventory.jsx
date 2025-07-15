@@ -91,7 +91,8 @@ const Inventory = () => {
           <div className={styles.filterIcon}>
             <FaFilter />
           </div>
-          <select value={selectedCategory} onChange={(e)=>{handleCategoryChange(e)}>
+          <select value={selectedCategory} onChange={handleCategoryChange}>
+
             <option value="all">All Categories</option>
             <option value="seeds">Seeds</option>
             <option value="fertilizers">Fertilizers</option>
