@@ -10,7 +10,7 @@ const app= express();
 const port = process.env.PORT;
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({origin:"http://localhost:5173"}))
+app.use(cors({origin:"https://mssahu-inventory.onrender.com/"}))
 app.use("/admin",router)
 ConnectDb();
 app.get("/",(req,res)=>{
