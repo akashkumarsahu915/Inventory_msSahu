@@ -18,7 +18,7 @@ export const SalesProvider = ({ children }) => {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/admin/getAllSellProduct")
+        const response = await axios.get("https://mssahu-inventory-backend.onrender.com/admin/getAllSellProduct")
         setSales(response.data.sellitems)
         console.log(response.data.sellitems)
         setLoading(false)
@@ -37,7 +37,7 @@ export const SalesProvider = ({ children }) => {
 
   // Add a new sale
   const addSale = async(sale) => {
-    const responce = await axios.post("http://localhost:3000/admin/sellproduct", sale)
+    const responce = await axios.post("https://mssahu-inventory-backend.onrender.com/admin/sellproduct", sale)
     console.log(responce)
   }
 
