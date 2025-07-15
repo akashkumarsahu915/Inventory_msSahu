@@ -7,7 +7,7 @@ import styles from './NewSale.module.css';
 
 const NewSale = () => {
   const navigate = useNavigate();
-  const { products = [], updateStock } = useInventory();
+  const { products, updateStock } = useInventory();
   const { addSale } = useSales();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,14 +31,12 @@ const NewSale = () => {
   }, [searchQuery, products]);
 
   const addToCart = (product) => {
-    const productId = product._id || product.id;
-    const existing = cartItems.find(item => item.id === productId);
-
+    const existing = cartItems.find(item => item.id === product._id || item.id === product.id);
     if (existing) {
-      updateQuantity(productId, existing.quantity + 1);
+      updateQuantity(existing.id, existing.quantity + 1);
     } else {
       setCartItems([...cartItems, {
-        id: productId,
+        id: product._id || product.id,
         name: product.name,
         price: product.price,
         quantity: 1,
@@ -46,16 +44,13 @@ const NewSale = () => {
         unit: product.unit
       }]);
     }
-
     setSearchQuery('');
     setSearchResults([]);
   };
 
   const updateQuantity = (id, quantity) => {
     setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity: Math.max(1, Math.min(item.maxQuantity, quantity)) } : item
-      )
+      prev.map(item => item.id === id ? { ...item, quantity: Math.max(1, Math.min(item.maxQuantity, quantity)) } : item)
     );
   };
 
@@ -68,8 +63,12 @@ const NewSale = () => {
   const total = subtotal + taxAmount;
 
   const handleCompleteSale = async () => {
-    if (!cartItems.length) return alert('Add at least one item');
-    if (!customer.trim()) return alert('Enter customer name');
+    if (!customer.trim()) {
+      return alert('Please enter customer name');
+    }
+    if (cartItems.length === 0) {
+      return alert('Add at least one item to the cart');
+    }
 
     const sale = {
       customer,
@@ -87,6 +86,7 @@ const NewSale = () => {
       navigate('/sales');
     } catch (err) {
       console.error('Sale submission failed', err);
+      alert('Failed to complete sale');
     }
   };
 
@@ -97,9 +97,9 @@ const NewSale = () => {
       </div>
 
       <div className={styles.saleContainer}>
-        {/* Product Search */}
         <div className={styles.productSearch}>
           <h2>Add Products</h2>
+
           <div className={styles.searchBox}>
             <FaSearch className={styles.searchIcon} />
             <input
@@ -123,6 +123,7 @@ const NewSale = () => {
                       </span>
                     </div>
                   </div>
+
                   <button
                     className={`btn btn-outline ${styles.addButton}`}
                     onClick={() => addToCart(product)}
@@ -145,7 +146,6 @@ const NewSale = () => {
           </div>
         </div>
 
-        {/* Cart Panel */}
         <div className={styles.cart}>
           <h2>Current Sale</h2>
 
@@ -158,6 +158,7 @@ const NewSale = () => {
                 value={customer}
                 onChange={(e) => setCustomer(e.target.value)}
                 placeholder="Enter customer name"
+                required
               />
             </div>
 
