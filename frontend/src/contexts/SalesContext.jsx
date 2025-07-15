@@ -17,7 +17,7 @@ export const SalesProvider = ({ children }) => {
           withCredentials: true
         });
 
-        const fetchedSales = res.data.sales || [];
+        const fetchedSales = res.data.sellitems || [];
         setSales(fetchedSales);
         console.log('Fetched sales:', fetchedSales);
       } catch (err) {
@@ -35,7 +35,7 @@ export const SalesProvider = ({ children }) => {
   const addSale = async (sale) => {
     try {
       const res = await axios.post(
-        'https://mssahu-inventory-backend.onrender.com/admin/sale/new',
+        'https://mssahu-inventory-backend.onrender.com/admin/sellproduct',
         sale,
         { withCredentials: true }
       );
