@@ -103,7 +103,7 @@ const NewSale = () => {
   date: new Date().toISOString()
 }
 
-    console.log("Sale object:", sale)
+ 
 
     // Add sale to context
     addSale(sale)
